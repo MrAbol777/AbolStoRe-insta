@@ -541,6 +541,78 @@ function logout() {
 }
 
 // ============================================
+// تابع دیباگ سفارش‌ها
+// ============================================
+
+async function debugOrders() {
+    console.log('=== DEBUG ORDERS ===');
+    
+    // بررسی localStorage
+    const localOrders = localStorage.getItem(ORDERS_STORAGE_KEY);
+    console.log('localStorage key:', ORDERS_STORAGE_KEY);
+    console.log('localStorage value:', localOrders);
+    
+    if (localOrders) {
+        try {
+            const parsed = JSON.parse(localOrders);
+            console.log('Parsed localStorage orders:', parsed);
+            console.log('Number of orders in localStorage:', parsed.length);
+        } catch (e) {
+            console.error('Error parsing localStorage:', e);
+        }
+    } else {
+        console.log('localStorage is empty!');
+    }
+    
+    // بررسی JSONBin
+    if (typeof jsonbinService !== 'undefined' && jsonbinService.isActive()) {
+        console.log('JSONBin is active');
+        try {
+            const jsonbinOrders = await jsonbinService.loadOrders();
+            console.log('JSONBin orders:', jsonbinOrders);
+            console.log('Number of orders in JSONBin:', jsonbinOrders.length);
+        } catch (e) {
+            console.error('Error loading from JSONBin:', e);
+        }
+    } else {
+        console.log('JSONBin is not active');
+    }
+    
+    // بررسی Firebase
+    if (typeof firebaseService !== 'undefined') {
+        console.log('Firebase is available');
+        try {
+            const firebaseOrders = await firebaseService.loadOrders();
+            console.log('Firebase orders:', firebaseOrders);
+            console.log('Number of orders in Firebase:', firebaseOrders.length);
+        } catch (e) {
+            console.error('Error loading from Firebase:', e);
+        }
+    } else {
+        console.log('Firebase is not available');
+    }
+    
+    // بررسی متغیر orders
+    console.log('Current orders variable:', orders);
+    console.log('Current orders length:', orders.length);
+    
+    // نمایش در alert
+    const info = `
+=== اطلاعات دیباگ سفارش‌ها ===
+
+localStorage: ${localOrders ? JSON.parse(localOrders).length + ' سفارش' : 'خالی'}
+JSONBin: ${typeof jsonbinService !== 'undefined' && jsonbinService.isActive() ? 'فعال' : 'غیرفعال'}
+Firebase: ${typeof firebaseService !== 'undefined' ? 'فعال' : 'غیرفعال'}
+متغیر orders: ${orders.length} سفارش
+
+برای جزئیات بیشتر، Console را بررسی کنید (F12)
+    `.trim();
+    
+    alert(info);
+    console.log('=== END DEBUG ===');
+}
+
+// ============================================
 // Event Listeners
 // ============================================
 
@@ -611,6 +683,21 @@ function setupEventListeners() {
         logoutBtn.addEventListener('click', logout);
     } else {
         console.error('Logout button not found!');
+    }
+
+    // Debug Orders Button
+    const debugOrdersBtn = document.getElementById('debugOrdersBtn');
+    if (debugOrdersBtn) {
+        debugOrdersBtn.addEventListener('click', debugOrders);
+    }
+
+    // Refresh Orders Button
+    const refreshOrdersBtn = document.getElementById('refreshOrdersBtn');
+    if (refreshOrdersBtn) {
+        refreshOrdersBtn.addEventListener('click', async () => {
+            await loadOrders();
+            alert('سفارش‌ها رفرش شدند!');
+        });
     }
 }
 
