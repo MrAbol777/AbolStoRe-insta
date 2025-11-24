@@ -547,6 +547,14 @@ function logout() {
 async function debugOrders() {
     console.log('=== DEBUG ORDERS ===');
     
+    let localStorageCount = 0;
+    let jsonbinCount = 0;
+    let firebaseCount = 0;
+    let jsonbinStatus = 'غیرفعال';
+    let firebaseStatus = 'غیرفعال';
+    let jsonbinError = null;
+    let firebaseError = null;
+    
     // بررسی localStorage
     const localOrders = localStorage.getItem(ORDERS_STORAGE_KEY);
     console.log('localStorage key:', ORDERS_STORAGE_KEY);
@@ -555,8 +563,9 @@ async function debugOrders() {
     if (localOrders) {
         try {
             const parsed = JSON.parse(localOrders);
+            localStorageCount = parsed.length;
             console.log('Parsed localStorage orders:', parsed);
-            console.log('Number of orders in localStorage:', parsed.length);
+            console.log('Number of orders in localStorage:', localStorageCount);
         } catch (e) {
             console.error('Error parsing localStorage:', e);
         }
@@ -566,12 +575,46 @@ async function debugOrders() {
     
     // بررسی JSONBin
     if (typeof jsonbinService !== 'undefined' && jsonbinService.isActive()) {
+        jsonbinStatus = 'فعال';
         console.log('JSONBin is active');
         try {
+            // تست مستقیم JSONBin API
+            const JSONBIN_API_KEY = '$2a$10$gYsMP3xTRxsvHKNQA9Iuu.XvEwqs3n4BkuQ3kUKYlMC6WcZhv/OeK';
+            const JSONBIN_BIN_ID = '692437cad0ea881f40fcc13d';
+            const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+            
+            const response = await fetch(JSONBIN_URL + '/latest', {
+                headers: {
+                    'X-Master-Key': JSONBIN_API_KEY
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('JSONBin raw data:', data);
+                console.log('JSONBin record:', data.record);
+                
+                if (data.record) {
+                    if (Array.isArray(data.record.orders)) {
+                        jsonbinCount = data.record.orders.length;
+                        console.log('JSONBin orders array:', data.record.orders);
+                    } else if (data.record.orders) {
+                        console.log('JSONBin orders (not array):', data.record.orders);
+                        jsonbinCount = 'نامشخص (نه array)';
+                    } else {
+                        console.log('JSONBin orders field not found');
+                    }
+                }
+            } else {
+                jsonbinError = `HTTP ${response.status}: ${response.statusText}`;
+                console.error('JSONBin API error:', jsonbinError);
+            }
+            
             const jsonbinOrders = await jsonbinService.loadOrders();
-            console.log('JSONBin orders:', jsonbinOrders);
-            console.log('Number of orders in JSONBin:', jsonbinOrders.length);
+            console.log('JSONBin orders (via service):', jsonbinOrders);
+            console.log('Number of orders in JSONBin (via service):', jsonbinOrders.length);
         } catch (e) {
+            jsonbinError = e.message;
             console.error('Error loading from JSONBin:', e);
         }
     } else {
@@ -580,12 +623,15 @@ async function debugOrders() {
     
     // بررسی Firebase
     if (typeof firebaseService !== 'undefined') {
+        firebaseStatus = 'فعال';
         console.log('Firebase is available');
         try {
             const firebaseOrders = await firebaseService.loadOrders();
+            firebaseCount = firebaseOrders.length;
             console.log('Firebase orders:', firebaseOrders);
-            console.log('Number of orders in Firebase:', firebaseOrders.length);
+            console.log('Number of orders in Firebase:', firebaseCount);
         } catch (e) {
+            firebaseError = e.message;
             console.error('Error loading from Firebase:', e);
         }
     } else {
@@ -597,16 +643,24 @@ async function debugOrders() {
     console.log('Current orders length:', orders.length);
     
     // نمایش در alert
-    const info = `
-=== اطلاعات دیباگ سفارش‌ها ===
-
-localStorage: ${localOrders ? JSON.parse(localOrders).length + ' سفارش' : 'خالی'}
-JSONBin: ${typeof jsonbinService !== 'undefined' && jsonbinService.isActive() ? 'فعال' : 'غیرفعال'}
-Firebase: ${typeof firebaseService !== 'undefined' ? 'فعال' : 'غیرفعال'}
-متغیر orders: ${orders.length} سفارش
-
-برای جزئیات بیشتر، Console را بررسی کنید (F12)
-    `.trim();
+    let info = `=== اطلاعات دیباگ سفارش‌ها ===\n\n`;
+    info += `localStorage: ${localStorageCount} سفارش\n`;
+    info += `JSONBin: ${jsonbinStatus}`;
+    if (jsonbinStatus === 'فعال') {
+        info += ` (${jsonbinCount} سفارش)`;
+        if (jsonbinError) {
+            info += `\n⚠️ خطا: ${jsonbinError}`;
+        }
+    }
+    info += `\nFirebase: ${firebaseStatus}`;
+    if (firebaseStatus === 'فعال') {
+        info += ` (${firebaseCount} سفارش)`;
+        if (firebaseError) {
+            info += `\n⚠️ خطا: ${firebaseError}`;
+        }
+    }
+    info += `\nمتغیر orders: ${orders.length} سفارش\n\n`;
+    info += `برای جزئیات بیشتر، Console را بررسی کنید (F12)`;
     
     alert(info);
     console.log('=== END DEBUG ===');
