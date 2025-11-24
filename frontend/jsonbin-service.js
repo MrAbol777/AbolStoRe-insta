@@ -120,19 +120,46 @@ class JSONBinService {
 
             const data = await response.json();
             console.log('JSONBin data received:', data); // Debug
+            console.log('JSONBin record:', data.record); // Debug
+            console.log('JSONBin record type:', typeof data.record); // Debug
+            console.log('JSONBin record.orders:', data.record?.orders); // Debug
+            console.log('JSONBin record.orders type:', typeof data.record?.orders); // Debug
+            console.log('Is orders an array?', Array.isArray(data.record?.orders)); // Debug
             
             // بررسی ساختار داده
             let orders = [];
             if (data.record) {
-                if (Array.isArray(data.record.orders)) {
-                    orders = data.record.orders;
+                // اول بررسی کن که آیا orders به صورت مستقیم وجود دارد
+                if (data.record.orders !== undefined) {
+                    if (Array.isArray(data.record.orders)) {
+                        orders = data.record.orders;
+                        console.log('Found orders array in data.record.orders'); // Debug
+                    } else {
+                        console.warn('data.record.orders exists but is not an array:', data.record.orders); // Debug
+                        // اگر object است، آن را به array تبدیل کن
+                        if (typeof data.record.orders === 'object') {
+                            orders = Object.values(data.record.orders);
+                            console.log('Converted orders object to array:', orders); // Debug
+                        }
+                    }
                 } else if (Array.isArray(data.record)) {
                     // اگر record خودش یک array است
                     orders = data.record;
+                    console.log('Found orders array directly in data.record'); // Debug
+                } else {
+                    // بررسی تمام کلیدهای record
+                    console.log('Record keys:', Object.keys(data.record)); // Debug
+                    // شاید orders با نام دیگری ذخیره شده
+                    for (const key in data.record) {
+                        if (Array.isArray(data.record[key])) {
+                            console.log(`Found array in key "${key}":`, data.record[key]); // Debug
+                        }
+                    }
                 }
             }
             
             console.log('Orders from JSONBin:', orders.length); // Debug
+            console.log('Orders content:', orders); // Debug
 
             // همیشه localStorage را هم چک کن و merge کن
             const localOrders = this.loadOrdersFromLocalStorage();
@@ -171,6 +198,9 @@ class JSONBinService {
         }
 
         try {
+            console.log('Saving orders to JSONBin, count:', orders.length); // Debug
+            console.log('Orders to save:', orders); // Debug
+            
             // ابتدا داده‌های فعلی را بخوان
             const currentData = await fetch(JSONBIN_URL + '/latest', {
                 headers: {
@@ -178,8 +208,19 @@ class JSONBinService {
                 }
             }).then(res => res.ok ? res.json() : { record: {} });
 
+            console.log('Current data from JSONBin:', currentData); // Debug
+            console.log('Current products:', currentData.record?.products); // Debug
+            console.log('Current orders:', currentData.record?.orders); // Debug
+
             // محصولات را حفظ کن و فقط orders را به‌روزرسانی کن
             const products = currentData.record?.products || [];
+            
+            const dataToSave = { 
+                products: products,
+                orders: orders 
+            };
+            
+            console.log('Data to save to JSONBin:', dataToSave); // Debug
             
             const response = await fetch(JSONBIN_URL, {
                 method: 'PUT',
@@ -187,11 +228,10 @@ class JSONBinService {
                     'Content-Type': 'application/json',
                     'X-Master-Key': JSONBIN_API_KEY
                 },
-                body: JSON.stringify({ 
-                    products: products,
-                    orders: orders 
-                })
+                body: JSON.stringify(dataToSave)
             });
+            
+            console.log('JSONBin save response status:', response.status); // Debug
 
             if (response.ok) {
                 // همگام‌سازی با localStorage
