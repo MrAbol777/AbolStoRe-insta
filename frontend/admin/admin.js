@@ -293,20 +293,27 @@ function deleteProduct(id) {
     document.getElementById('deleteModal').classList.add('active');
 }
 
-function confirmDelete() {
-    if (currentDeleteType === 'product') {
-        products = products.filter(p => p.id !== currentDeleteId);
-        saveProducts();
-        renderProducts();
-    } else if (currentDeleteType === 'order') {
-        orders = orders.filter(o => o.id !== currentDeleteId);
-        saveOrders();
-        renderOrders();
+async function confirmDelete() {
+    try {
+        if (currentDeleteType === 'product') {
+            products = products.filter(p => p.id !== currentDeleteId);
+            await saveProducts();
+            renderProducts();
+            alert('محصول با موفقیت حذف شد!');
+        } else if (currentDeleteType === 'order') {
+            orders = orders.filter(o => o.id !== currentDeleteId);
+            saveOrders();
+            renderOrders();
+            alert('سفارش با موفقیت حذف شد!');
+        }
+        
+        closeModal('deleteModal');
+        currentDeleteId = null;
+        currentDeleteType = null;
+    } catch (error) {
+        console.error('خطا در حذف:', error);
+        alert('خطا در حذف. لطفاً دوباره تلاش کنید.');
     }
-    
-    closeModal('deleteModal');
-    currentDeleteId = null;
-    currentDeleteType = null;
 }
 
 async function saveProduct(event) {
