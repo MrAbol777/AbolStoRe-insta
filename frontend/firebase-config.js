@@ -15,19 +15,27 @@ const FIREBASE_CONFIG = {
     appId: "YOUR_APP_ID"
 };
 
+// Firebase SDK غیرفعال شده - از JSONBin استفاده می‌شود
+// اگر می‌خواهید Firebase را فعال کنید، SDK را از comment خارج کنید
+
 // بررسی اینکه آیا Firebase SDK لود شده یا نه
-if (typeof firebase === 'undefined') {
-    console.error('Firebase SDK لود نشده است!');
-}
-
-// Initialize Firebase (اگر قبلاً initialize نشده)
-if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-    firebase.initializeApp(FIREBASE_CONFIG);
-}
-
-// Export database reference
-let database = null;
 if (typeof firebase !== 'undefined') {
-    database = firebase.database();
+    // Initialize Firebase (اگر قبلاً initialize نشده)
+    if (!firebase.apps || firebase.apps.length === 0) {
+        try {
+            firebase.initializeApp(FIREBASE_CONFIG);
+        } catch (error) {
+            console.warn('Firebase initialize failed:', error);
+        }
+    }
+    
+    // Export database reference
+    let database = null;
+    if (typeof firebase.database !== 'undefined') {
+        database = firebase.database();
+    }
+} else {
+    // Firebase SDK لود نشده - این طبیعی است چون از JSONBin استفاده می‌کنیم
+    // console.log('Firebase SDK لود نشده - از JSONBin استفاده می‌شود');
 }
 

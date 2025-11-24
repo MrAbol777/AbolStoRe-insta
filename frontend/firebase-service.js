@@ -10,11 +10,19 @@ class FirebaseService {
         
         // بررسی اینکه Firebase لود شده یا نه
         if (typeof firebase !== 'undefined' && firebase.database) {
-            this.db = firebase.database();
-            this.productsRef = this.db.ref('products');
-            this.ordersRef = this.db.ref('orders');
+            try {
+                this.db = firebase.database();
+                this.productsRef = this.db.ref('products');
+                this.ordersRef = this.db.ref('orders');
+            } catch (error) {
+                console.warn('Firebase initialize failed:', error);
+                this.db = null;
+                this.productsRef = null;
+                this.ordersRef = null;
+            }
         } else {
-            console.warn('Firebase SDK لود نشده است. از localStorage استفاده می‌شود.');
+            // Firebase SDK لود نشده - این طبیعی است چون از JSONBin استفاده می‌کنیم
+            // console.log('Firebase SDK لود نشده - از JSONBin استفاده می‌شود');
         }
     }
 

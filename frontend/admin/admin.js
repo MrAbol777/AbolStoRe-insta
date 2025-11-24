@@ -386,7 +386,8 @@ function switchPage(page) {
     } else if (page === 'orders') {
         document.getElementById('ordersPage').classList.add('active');
         document.querySelector('[data-page="orders"]').classList.add('active');
-        loadOrders();
+        // loadOrders async است، باید await کنیم یا بدون await فراخوانی کنیم
+        loadOrders().catch(err => console.error('خطا در بارگذاری سفارش‌ها:', err));
     }
 }
 
