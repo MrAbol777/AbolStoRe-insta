@@ -309,45 +309,53 @@ function confirmDelete() {
     currentDeleteType = null;
 }
 
-function saveProduct(event) {
+async function saveProduct(event) {
     event.preventDefault();
     
-    const formData = new FormData(event.target);
-    const id = parseInt(formData.get('id')) || Date.now();
-    const title = formData.get('title');
-    const shortDescription = formData.get('shortDescription');
-    const description = formData.get('description');
-    const price = parseInt(formData.get('price'));
-    const image = formData.get('image');
-    const items = formData.get('items').split('\n').filter(item => item.trim() !== '');
+    try {
+        const formData = new FormData(event.target);
+        const id = parseInt(formData.get('id')) || Date.now();
+        const title = formData.get('title');
+        const shortDescription = formData.get('shortDescription');
+        const description = formData.get('description');
+        const price = parseInt(formData.get('price'));
+        const image = formData.get('image');
+        const items = formData.get('items').split('\n').filter(item => item.trim() !== '');
 
-    if (!title || !shortDescription || !description || !price || !image || items.length === 0) {
-        alert('لطفاً تمام فیلدها را پر کنید.');
-        return;
+        if (!title || !shortDescription || !description || !price || !image || items.length === 0) {
+            alert('لطفاً تمام فیلدها را پر کنید.');
+            return;
+        }
+
+        const product = {
+            id: id,
+            title: title,
+            shortDescription: shortDescription,
+            description: description,
+            price: price,
+            image: image,
+            items: items
+        };
+
+        const existingIndex = products.findIndex(p => p.id === id);
+        if (existingIndex >= 0) {
+            products[existingIndex] = product;
+        } else {
+            products.push(product);
+        }
+
+        // ذخیره در JSONBin یا Firebase
+        await saveProducts();
+        renderProducts();
+        closeModal('productModal');
+        event.target.reset();
+        
+        // نمایش پیام موفقیت
+        alert('محصول با موفقیت ذخیره شد!');
+    } catch (error) {
+        console.error('خطا در ذخیره محصول:', error);
+        alert('خطا در ذخیره محصول. لطفاً دوباره تلاش کنید.');
     }
-
-    const product = {
-        id: id,
-        title: title,
-        shortDescription: shortDescription,
-        description: description,
-        price: price,
-        image: image,
-        items: items
-    };
-
-    const existingIndex = products.findIndex(p => p.id === id);
-    if (existingIndex >= 0) {
-        products[existingIndex] = product;
-    } else {
-        products.push(product);
-    }
-
-    // ذخیره در Firebase
-    await saveProducts();
-    renderProducts();
-    closeModal('productModal');
-    event.target.reset();
 }
 
 // ============================================
@@ -360,12 +368,28 @@ function deleteOrder(id) {
     document.getElementById('deleteModal').classList.add('active');
 }
 
-function updateOrderStatus(id, status) {
-    const order = orders.find(o => o.id === id);
-    if (order) {
-        order.status = status;
-        saveOrders();
-        renderOrders();
+async function updateOrderStatus(id, status) {
+    try {
+        // به‌روزرسانی در Firebase (اگر فعال باشد)
+        if (typeof firebaseService !== 'undefined') {
+            await firebaseService.updateOrderStatus(id, status);
+        }
+        
+        const order = orders.find(o => o.id === id);
+        if (order) {
+            order.status = status;
+            saveOrders();
+            renderOrders();
+        }
+    } catch (error) {
+        console.error('خطا در به‌روزرسانی وضعیت:', error);
+        // Fallback: فقط localStorage
+        const order = orders.find(o => o.id === id);
+        if (order) {
+            order.status = status;
+            saveOrders();
+            renderOrders();
+        }
     }
 }
 
@@ -373,21 +397,26 @@ function updateOrderStatus(id, status) {
 // مدیریت صفحات
 // ============================================
 
-function switchPage(page) {
-    // مخفی کردن همه صفحات
-    document.querySelectorAll('.admin-page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+async function switchPage(page) {
+    try {
+        // مخفی کردن همه صفحات
+        document.querySelectorAll('.admin-page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
 
-    // نمایش صفحه انتخاب شده
-    if (page === 'products') {
-        document.getElementById('productsPage').classList.add('active');
-        document.querySelector('[data-page="products"]').classList.add('active');
-        loadProducts();
-    } else if (page === 'orders') {
-        document.getElementById('ordersPage').classList.add('active');
-        document.querySelector('[data-page="orders"]').classList.add('active');
-        // loadOrders async است، باید await کنیم یا بدون await فراخوانی کنیم
-        loadOrders().catch(err => console.error('خطا در بارگذاری سفارش‌ها:', err));
+        // نمایش صفحه انتخاب شده
+        if (page === 'products') {
+            document.getElementById('productsPage').classList.add('active');
+            const productsLink = document.querySelector('[data-page="products"]');
+            if (productsLink) productsLink.classList.add('active');
+            await loadProducts();
+        } else if (page === 'orders') {
+            document.getElementById('ordersPage').classList.add('active');
+            const ordersLink = document.querySelector('[data-page="orders"]');
+            if (ordersLink) ordersLink.classList.add('active');
+            await loadOrders();
+        }
+    } catch (error) {
+        console.error('خطا در switchPage:', error);
     }
 }
 
@@ -441,10 +470,25 @@ function setupEventListeners() {
     document.getElementById('productForm').addEventListener('submit', saveProduct);
 
     // بستن Modal‌ها
-    document.getElementById('closeProductModal').addEventListener('click', () => closeModal('productModal'));
-    document.getElementById('cancelProductBtn').addEventListener('click', () => closeModal('productModal'));
-    document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
-    document.getElementById('cancelDeleteBtn').addEventListener('click', () => closeModal('deleteModal'));
+    const closeProductModal = document.getElementById('closeProductModal');
+    if (closeProductModal) {
+        closeProductModal.addEventListener('click', () => closeModal('productModal'));
+    }
+    
+    const cancelProductBtn = document.getElementById('cancelProductBtn');
+    if (cancelProductBtn) {
+        cancelProductBtn.addEventListener('click', () => closeModal('productModal'));
+    }
+    
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', confirmDelete);
+    }
+    
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    if (cancelDeleteBtn) {
+        cancelDeleteBtn.addEventListener('click', () => closeModal('deleteModal'));
+    }
 
     // بستن Modal با کلیک روی پس‌زمینه
     document.querySelectorAll('.modal').forEach(modal => {
@@ -456,23 +500,38 @@ function setupEventListeners() {
     });
 
     // Logout
-    document.getElementById('logoutBtn').addEventListener('click', logout);
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+    } else {
+        console.error('Logout button not found!');
+    }
 }
 
 // ============================================
 // راه‌اندازی اولیه
 // ============================================
 
-function init() {
-    console.log('Admin init started'); // Debug
-    checkAuth();
-    
-    // کمی تاخیر برای اطمینان از لود شدن DOM
-    setTimeout(() => {
-        setupEventListeners();
-        switchPage('products');
-        console.log('Admin init completed'); // Debug
-    }, 100);
+async function init() {
+    try {
+        console.log('Admin init started'); // Debug
+        checkAuth();
+        
+        // کمی تاخیر برای اطمینان از لود شدن DOM
+        setTimeout(async () => {
+            try {
+                setupEventListeners();
+                await switchPage('products');
+                console.log('Admin init completed'); // Debug
+            } catch (error) {
+                console.error('خطا در init:', error);
+                alert('خطا در بارگذاری پنل. لطفاً صفحه را refresh کنید.');
+            }
+        }, 100);
+    } catch (error) {
+        console.error('خطا در init:', error);
+        alert('خطا در بارگذاری پنل. لطفاً صفحه را refresh کنید.');
+    }
 }
 
 // اجرای تابع init هنگام بارگذاری صفحه
