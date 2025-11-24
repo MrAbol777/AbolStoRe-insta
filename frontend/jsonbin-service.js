@@ -219,12 +219,16 @@ class JSONBinService {
             // محصولات را حفظ کن و فقط orders را به‌روزرسانی کن
             const products = currentData.record?.products || [];
             
+            console.log('Saving to JSONBin - products count:', products.length); // Debug
+            console.log('Saving to JSONBin - orders count:', orders.length); // Debug
+            console.log('Saving to JSONBin - orders:', orders); // Debug
+            
             const dataToSave = { 
                 products: products,
                 orders: orders 
             };
             
-            console.log('Data to save to JSONBin:', dataToSave); // Debug
+            console.log('Full data to save:', JSON.stringify(dataToSave, null, 2)); // Debug
             
             const response = await fetch(JSONBIN_URL, {
                 method: 'PUT',
@@ -234,6 +238,15 @@ class JSONBinService {
                 },
                 body: JSON.stringify(dataToSave)
             });
+            
+            console.log('JSONBin save response status:', response.status); // Debug
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('JSONBin save error:', errorText); // Debug
+            } else {
+                const savedData = await response.json();
+                console.log('JSONBin save successful, saved data:', savedData); // Debug
+            }
             
             console.log('JSONBin save response status:', response.status); // Debug
 
