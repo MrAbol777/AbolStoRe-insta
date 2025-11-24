@@ -88,7 +88,7 @@ async function loadProducts() {
             const response = await fetch('../products.json');
             if (response.ok) {
                 products = await response.json();
-                saveProducts();
+                await saveProducts();
             }
         } catch (error) {
             console.error('خطا در بارگذاری محصولات:', error);
