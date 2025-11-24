@@ -5,8 +5,8 @@
 // TODO: این مقادیر را با اطلاعات JSONBin خود جایگزین کنید
 // برای ساخت Bin: https://jsonbin.io/ → Create Bin
 
-const JSONBIN_API_KEY = 'YOUR_JSONBIN_API_KEY';
-const JSONBIN_BIN_ID = 'YOUR_JSONBIN_BIN_ID';
+const JSONBIN_API_KEY = '$2a$10$gYsMP3xTRxsvHKNQA9Iuu.XvEwqs3n4BkuQ3kUKYlMC6WcZhv/OeK';
+const JSONBIN_BIN_ID = '692437cad0ea881f40fcc13d';
 const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
 class JSONBinService {
