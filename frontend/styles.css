@@ -103,7 +103,7 @@ body {
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: var(--spacing-sm);
 }
 
 .header-info {
@@ -172,6 +172,40 @@ body {
     display: flex;
     align-items: center;
     gap: 15px;
+}
+
+/* دکمه‌های تماس برای موبایل */
+.mobile-contact-btn {
+    display: none;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+}
+
+.contact-btn-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-primary);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex: 1;
+}
+
+.contact-btn-mobile:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-primary-lg);
+}
+
+.contact-btn-mobile span:first-child {
+    font-size: 1rem;
+    flex-shrink: 0;
 }
 
 .admin-link {
@@ -1076,33 +1110,41 @@ textarea.gaming-input {
    ============================================ */
 
 @media (max-width: 768px) {
+    .header {
+        padding: var(--spacing-sm) 0;
+    }
+
+    .mobile-contact-btn {
+        display: flex;
+        width: 100%;
+    }
+
     .header-content {
-        flex-direction: column;
-        text-align: center;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--spacing-sm);
     }
 
     .header-info {
-        width: 100%;
-        justify-content: center;
+        display: none;
     }
 
-    .contact-info {
-        flex-direction: column;
-        gap: 15px;
-        width: 100%;
-    }
-
-    .contact-item {
-        margin: 5px 0;
-    }
-
-    .contact-item {
-        width: 100%;
-        justify-content: center;
+    .logo {
+        flex: 1;
     }
 
     .logo-text {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
+    }
+
+    .header-actions {
+        flex-shrink: 0;
+    }
+
+    .cart-btn {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.9rem;
     }
 
     .hero-title {
