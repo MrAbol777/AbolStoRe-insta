@@ -121,10 +121,14 @@ class JSONBinService {
             const data = await response.json();
             console.log('JSONBin data received:', data); // Debug
             console.log('JSONBin record:', data.record); // Debug
+            console.log('JSONBin record (full):', JSON.stringify(data.record, null, 2)); // Debug
             console.log('JSONBin record type:', typeof data.record); // Debug
+            console.log('JSONBin record keys:', Object.keys(data.record || {})); // Debug
             console.log('JSONBin record.orders:', data.record?.orders); // Debug
             console.log('JSONBin record.orders type:', typeof data.record?.orders); // Debug
             console.log('Is orders an array?', Array.isArray(data.record?.orders)); // Debug
+            console.log('Is orders undefined?', data.record?.orders === undefined); // Debug
+            console.log('Is orders null?', data.record?.orders === null); // Debug
             
             // بررسی ساختار داده
             let orders = [];
