@@ -252,10 +252,23 @@ function renderOrders() {
 // ============================================
 
 function addProduct() {
-    document.getElementById('productModalTitle').textContent = 'افزودن محصول جدید';
-    document.getElementById('productForm').reset();
-    document.getElementById('productId').value = '';
-    document.getElementById('productModal').classList.add('active');
+    console.log('addProduct called'); // Debug
+    const modal = document.getElementById('productModal');
+    const title = document.getElementById('productModalTitle');
+    const form = document.getElementById('productForm');
+    const productId = document.getElementById('productId');
+    
+    if (!modal || !title || !form || !productId) {
+        console.error('Modal elements not found!', { modal, title, form, productId });
+        alert('خطا: المان‌های modal پیدا نشدند. لطفاً صفحه را refresh کنید.');
+        return;
+    }
+    
+    title.textContent = 'افزودن محصول جدید';
+    form.reset();
+    productId.value = '';
+    modal.classList.add('active');
+    console.log('Modal opened'); // Debug
 }
 
 function editProduct(id) {
@@ -411,7 +424,17 @@ function setupEventListeners() {
     });
 
     // دکمه افزودن محصول
-    document.getElementById('addProductBtn').addEventListener('click', addProduct);
+    const addProductBtn = document.getElementById('addProductBtn');
+    if (addProductBtn) {
+        addProductBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Add product button clicked'); // Debug
+            addProduct();
+        });
+        console.log('Add product button listener attached'); // Debug
+    } else {
+        console.error('Add product button not found!');
+    }
 
     // فرم محصول
     document.getElementById('productForm').addEventListener('submit', saveProduct);
@@ -440,9 +463,15 @@ function setupEventListeners() {
 // ============================================
 
 function init() {
+    console.log('Admin init started'); // Debug
     checkAuth();
-    setupEventListeners();
-    switchPage('products');
+    
+    // کمی تاخیر برای اطمینان از لود شدن DOM
+    setTimeout(() => {
+        setupEventListeners();
+        switchPage('products');
+        console.log('Admin init completed'); // Debug
+    }, 100);
 }
 
 // اجرای تابع init هنگام بارگذاری صفحه
