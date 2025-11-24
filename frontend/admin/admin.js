@@ -467,7 +467,12 @@ function setupEventListeners() {
     }
 
     // فرم محصول
-    document.getElementById('productForm').addEventListener('submit', saveProduct);
+    const productForm = document.getElementById('productForm');
+    if (productForm) {
+        productForm.addEventListener('submit', saveProduct);
+    } else {
+        console.error('Product form not found!');
+    }
 
     // بستن Modal‌ها
     const closeProductModal = document.getElementById('closeProductModal');
