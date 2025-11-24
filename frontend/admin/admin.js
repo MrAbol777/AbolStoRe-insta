@@ -28,7 +28,28 @@ function checkAuth() {
 // ============================================
 
 async function loadProducts() {
-    // اول از Firebase بخوان (اگر فعال باشد)
+    // اول از JSONBin بخوان (اگر فعال باشد) - ساده‌تر از Firebase
+    if (typeof jsonbinService !== 'undefined' && jsonbinService.isActive()) {
+        products = await jsonbinService.loadProducts();
+        
+        // اگر خالی بود، از products.json بخوان
+        if (products.length === 0) {
+            try {
+                const response = await fetch('../products.json');
+                if (response.ok) {
+                    products = await response.json();
+                    await jsonbinService.saveProducts(products);
+                }
+            } catch (error) {
+                console.error('خطا در بارگذاری محصولات:', error);
+            }
+        }
+        
+        renderProducts();
+        return;
+    }
+    
+    // دوم از Firebase بخوان (اگر فعال باشد)
     if (typeof firebaseService !== 'undefined') {
         products = await firebaseService.loadProducts();
         
@@ -95,7 +116,13 @@ async function loadOrders() {
 }
 
 async function saveProducts() {
-    // ذخیره در Firebase (اگر فعال باشد)
+    // اول JSONBin را امتحان کن (ساده‌تر)
+    if (typeof jsonbinService !== 'undefined' && jsonbinService.isActive()) {
+        await jsonbinService.saveProducts(products);
+        return;
+    }
+    
+    // دوم Firebase را امتحان کن
     if (typeof firebaseService !== 'undefined') {
         await firebaseService.saveProducts(products);
     } else {

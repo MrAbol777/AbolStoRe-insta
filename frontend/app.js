@@ -33,7 +33,25 @@ function formatPrice(price) {
  */
 async function loadProducts() {
     try {
-        // اول از Firebase بخوان (اگر فعال باشد)
+        // اول از JSONBin بخوان (اگر فعال باشد) - ساده‌تر از Firebase
+        if (typeof jsonbinService !== 'undefined' && jsonbinService.isActive()) {
+            products = await jsonbinService.loadProducts();
+            
+            // اگر محصولی در JSONBin نبود، از products.json بخوان
+            if (products.length === 0) {
+                const response = await fetch('products.json');
+                if (response.ok) {
+                    products = await response.json();
+                    // ذخیره در JSONBin برای دفعات بعد
+                    await jsonbinService.saveProducts(products);
+                }
+            }
+            
+            renderProducts();
+            return;
+        }
+        
+        // دوم از Firebase بخوان (اگر فعال باشد)
         if (typeof firebaseService !== 'undefined') {
             products = await firebaseService.loadProducts();
             
