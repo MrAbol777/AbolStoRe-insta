@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود به پنل مدیریت - فروشگاه کمبو</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-box {
+            background: linear-gradient(135deg, var(--dark-card) 0%, var(--dark-border) 100%);
+            border: 2px solid var(--neon-blue);
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: var(--shadow-blue);
+        }
+        .login-title {
+            font-family: var(--font-gaming);
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--neon-blue);
+            text-shadow: var(--shadow-blue);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .back-link a {
+            color: var(--neon-green);
+            text-decoration: none;
+        }
+        .error-message {
+            background: rgba(255, 0, 102, 0.2);
+            border: 1px solid var(--neon-pink);
+            color: var(--neon-pink);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h1 class="login-title">🔐 ورود به پنل</h1>
+            <div class="error-message" id="errorMessage">رمز عبور اشتباه است!</div>
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="password" class="neon-label">رمز مدیریت</label>
+                    <input type="password" id="password" name="password" required 
+                           class="gaming-input" placeholder="رمز عبور را وارد کنید" autocomplete="off">
+                </div>
+                <button type="submit" class="btn btn-primary gaming-btn">ورود</button>
+            </form>
+            <div class="back-link">
+                <a href="../index.html">← بازگشت به فروشگاه</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        // رمز مدیریت (قابل تغییر)
+        const ADMIN_PASSWORD = 'admin123';
+        const ADMIN_SESSION_KEY = 'combo_admin_session';
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+
+            if (password === ADMIN_PASSWORD) {
+                // ذخیره session
+                localStorage.setItem(ADMIN_SESSION_KEY, 'true');
+                // هدایت به پنل مدیریت
+                window.location.href = 'dashboard.html';
+            } else {
+                errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 3000);
+            }
+        });
+
+        // اگر قبلاً وارد شده، مستقیماً به پنل برود
+        if (localStorage.getItem(ADMIN_SESSION_KEY) === 'true') {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت - فروشگاه کمبو</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <!-- هدر مدیریتی -->
+    <header class="admin-header">
+        <div class="container">
+            <div class="admin-header-content">
+                <div class="admin-logo">
+                    <h1 class="neon-text">⚡ پنل مدیریت فروشگاه کمبو</h1>
+                </div>
+                <nav class="admin-nav">
+                    <a href="#products" class="nav-link active" data-page="products">📦 مدیریت محصولات</a>
+                    <a href="#orders" class="nav-link" data-page="orders">📋 مدیریت سفارش‌ها</a>
+                    <button class="btn btn-danger" id="logoutBtn">خروج</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- محتوای اصلی -->
+    <main class="admin-main">
+        <div class="container">
+            <!-- صفحه مدیریت محصولات -->
+            <section id="productsPage" class="admin-page active">
+                <div class="page-header">
+                    <h2 class="neon-text">📦 مدیریت محصولات</h2>
+                    <button class="btn btn-primary gaming-btn" id="addProductBtn">+ افزودن محصول جدید</button>
+                </div>
+
+                <!-- لیست محصولات -->
+                <div class="products-list" id="productsList">
+                    <!-- محصولات از طریق JavaScript لود می‌شوند -->
+                </div>
+            </section>
+
+            <!-- صفحه مدیریت سفارش‌ها -->
+            <section id="ordersPage" class="admin-page">
+                <div class="page-header">
+                    <h2 class="neon-text">📋 مدیریت سفارش‌ها</h2>
+                </div>
+
+                <!-- لیست سفارش‌ها -->
+                <div class="orders-list" id="ordersList">
+                    <!-- سفارش‌ها از طریق JavaScript لود می‌شوند -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal افزودن/ویرایش محصول -->
+    <div class="modal" id="productModal">
+        <div class="modal-content gaming-modal">
+            <span class="close" id="closeProductModal">&times;</span>
+            <div class="modal-header">
+                <h2 class="neon-text" id="productModalTitle">افزودن محصول جدید</h2>
+            </div>
+            <div class="modal-body">
+                <form id="productForm" class="admin-form">
+                    <input type="hidden" id="productId" name="id">
+                    
+                    <div class="form-group">
+                        <label for="productTitle" class="neon-label">نام محصول <span class="required">*</span></label>
+                        <input type="text" id="productTitle" name="title" required class="gaming-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productShortDesc" class="neon-label">توضیح کوتاه <span class="required">*</span></label>
+                        <input type="text" id="productShortDesc" name="shortDescription" required class="gaming-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productDesc" class="neon-label">توضیح کامل <span class="required">*</span></label>
+                        <textarea id="productDesc" name="description" required rows="4" class="gaming-input"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productPrice" class="neon-label">قیمت (تومان) <span class="required">*</span></label>
+                        <input type="number" id="productPrice" name="price" required min="0" class="gaming-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productImage" class="neon-label">لینک تصویر <span class="required">*</span></label>
+                        <input type="text" id="productImage" name="image" required 
+                               placeholder="assets/combo1.jpg" class="gaming-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productItems" class="neon-label">محتویات کمبو (هر خط یک آیتم) <span class="required">*</span></label>
+                        <textarea id="productItems" name="items" required rows="6" 
+                                  placeholder="آیتم 1&#10;آیتم 2&#10;آیتم 3" class="gaming-input"></textarea>
+                        <small>هر آیتم را در یک خط جداگانه وارد کنید</small>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary gaming-btn">ذخیره</button>
+                        <button type="button" class="btn btn-secondary gaming-btn" id="cancelProductBtn">انصراف</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal تأیید حذف -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content gaming-modal">
+            <div class="modal-body">
+                <div class="delete-confirm">
+                    <h3 class="neon-text">⚠️ آیا مطمئن هستید؟</h3>
+                    <p>این عمل قابل بازگشت نیست.</p>
+                    <div class="form-actions">
+                        <button class="btn btn-danger" id="confirmDeleteBtn">بله، حذف کن</button>
+                        <button class="btn btn-secondary gaming-btn" id="cancelDeleteBtn">انصراف</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
+

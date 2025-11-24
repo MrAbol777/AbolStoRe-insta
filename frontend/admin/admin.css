@@ -1,0 +1,403 @@
+/* ============================================
+   استایل‌های پنل مدیریت
+   ============================================ */
+
+.admin-header {
+    background: linear-gradient(135deg, var(--dark-card) 0%, var(--dark-border) 100%);
+    border-bottom: 2px solid var(--neon-purple);
+    box-shadow: var(--shadow-purple);
+    padding: 20px 0;
+    margin-bottom: 30px;
+}
+
+.admin-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.admin-logo h1 {
+    font-family: var(--font-gaming);
+    font-size: 1.8rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.admin-nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.nav-link {
+    color: var(--dark-text);
+    text-decoration: none;
+    padding: 10px 20px;
+    border: 2px solid var(--dark-border);
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    border-color: var(--neon-purple);
+    color: var(--neon-purple);
+    box-shadow: 0 0 15px rgba(176, 38, 255, 0.3);
+    background: rgba(176, 38, 255, 0.1);
+}
+
+.admin-main {
+    padding: 30px 0;
+    min-height: calc(100vh - 200px);
+}
+
+.admin-page {
+    display: none;
+}
+
+.admin-page.active {
+    display: block;
+    animation: fadeIn 0.3s;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.page-header h2 {
+    font-family: var(--font-gaming);
+    font-size: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* ============================================
+   لیست محصولات
+   ============================================ */
+
+.products-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.product-card-admin {
+    background: linear-gradient(135deg, var(--dark-card) 0%, var(--dark-border) 100%);
+    border: 2px solid var(--dark-border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s;
+}
+
+.product-card-admin:hover {
+    border-color: var(--neon-blue);
+    box-shadow: var(--shadow-blue);
+    transform: translateY(-5px);
+}
+
+.product-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 15px;
+}
+
+.product-card-title {
+    font-family: var(--font-gaming);
+    font-size: 1.3rem;
+    color: var(--neon-blue);
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    flex: 1;
+}
+
+.product-card-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.product-card-info {
+    color: var(--dark-text-light);
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.product-card-price {
+    font-family: var(--font-gaming);
+    font-size: 1.5rem;
+    color: var(--neon-purple);
+    margin-bottom: 15px;
+    text-shadow: 0 0 10px rgba(176, 38, 255, 0.5);
+}
+
+.product-card-items {
+    list-style: none;
+    margin-bottom: 15px;
+    padding-right: 20px;
+}
+
+.product-card-items li {
+    padding: 5px 0;
+    color: var(--dark-text-light);
+    font-size: 0.9rem;
+    position: relative;
+}
+
+.product-card-items li::before {
+    content: "▶";
+    position: absolute;
+    right: -20px;
+    color: var(--neon-green);
+    font-size: 0.8rem;
+}
+
+/* ============================================
+   لیست سفارش‌ها
+   ============================================ */
+
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.order-card {
+    background: linear-gradient(135deg, var(--dark-card) 0%, var(--dark-border) 100%);
+    border: 2px solid var(--dark-border);
+    border-radius: 12px;
+    padding: 25px;
+    transition: all 0.3s;
+}
+
+.order-card:hover {
+    border-color: var(--neon-purple);
+    box-shadow: var(--shadow-purple);
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.order-id {
+    font-family: var(--font-gaming);
+    font-size: 1.2rem;
+    color: var(--neon-blue);
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+.order-date {
+    color: var(--dark-text-light);
+    font-size: 0.9rem;
+}
+
+.order-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.info-label {
+    color: var(--dark-text-light);
+    font-size: 0.85rem;
+}
+
+.info-value {
+    color: var(--neon-blue);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.order-items {
+    background: rgba(0, 212, 255, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid var(--dark-border);
+}
+
+.order-items-title {
+    font-family: var(--font-gaming);
+    color: var(--neon-purple);
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--dark-border);
+    color: var(--dark-text-light);
+}
+
+.order-item:last-child {
+    border-bottom: none;
+}
+
+.order-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-top: 2px solid var(--neon-blue);
+    margin-top: 15px;
+}
+
+.order-total-label {
+    font-family: var(--font-gaming);
+    font-size: 1.3rem;
+    color: var(--neon-blue);
+}
+
+.order-total-value {
+    font-family: var(--font-gaming);
+    font-size: 1.5rem;
+    color: var(--neon-purple);
+    text-shadow: 0 0 10px rgba(176, 38, 255, 0.5);
+}
+
+.order-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--dark-border);
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.order-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-badge {
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.status-pending {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
+    border: 1px solid #ffa500;
+}
+
+.status-completed {
+    background: rgba(0, 255, 136, 0.2);
+    color: var(--neon-green);
+    border: 1px solid var(--neon-green);
+}
+
+.status-select {
+    background: var(--dark-bg);
+    border: 2px solid var(--dark-border);
+    color: var(--dark-text);
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-family: var(--font-main);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.status-select:focus {
+    outline: none;
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--dark-text-light);
+}
+
+.empty-state-icon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+/* ============================================
+   فرم مدیریت
+   ============================================ */
+
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.delete-confirm {
+    text-align: center;
+    padding: 20px;
+}
+
+.delete-confirm h3 {
+    font-family: var(--font-gaming);
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+.delete-confirm p {
+    color: var(--dark-text-light);
+    margin-bottom: 25px;
+}
+
+/* ============================================
+   ریسپانسیو
+   ============================================ */
+
+@media (max-width: 768px) {
+    .admin-header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .admin-nav {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .products-list {
+        grid-template-columns: 1fr;
+    }
+
+    .order-info {
+        grid-template-columns: 1fr;
+    }
+
+    .order-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
