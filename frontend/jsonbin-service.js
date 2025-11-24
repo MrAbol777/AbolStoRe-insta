@@ -98,6 +98,101 @@ class JSONBinService {
     }
 
     /**
+     * بارگذاری سفارش‌ها از JSONBin
+     */
+    async loadOrders() {
+        if (!this.isConfigured) {
+            console.warn('JSONBin تنظیم نشده است. از localStorage استفاده می‌شود.');
+            return this.loadOrdersFromLocalStorage();
+        }
+
+        try {
+            const response = await fetch(JSONBIN_URL + '/latest', {
+                headers: {
+                    'X-Master-Key': JSONBIN_API_KEY
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('خطا در بارگذاری از JSONBin');
+            }
+
+            const data = await response.json();
+            const orders = data.record?.orders || [];
+
+            if (orders.length > 0) {
+                // همگام‌سازی با localStorage
+                localStorage.setItem('combo_shop_orders', JSON.stringify(orders));
+                return orders;
+            } else {
+                return this.loadOrdersFromLocalStorage();
+            }
+        } catch (error) {
+            console.error('خطا در بارگذاری سفارش‌ها از JSONBin:', error);
+            return this.loadOrdersFromLocalStorage();
+        }
+    }
+
+    /**
+     * ذخیره سفارش‌ها در JSONBin
+     */
+    async saveOrders(orders) {
+        if (!this.isConfigured) {
+            // Fallback به localStorage
+            localStorage.setItem('combo_shop_orders', JSON.stringify(orders));
+            return true;
+        }
+
+        try {
+            // ابتدا داده‌های فعلی را بخوان
+            const currentData = await fetch(JSONBIN_URL + '/latest', {
+                headers: {
+                    'X-Master-Key': JSONBIN_API_KEY
+                }
+            }).then(res => res.ok ? res.json() : { record: {} });
+
+            // محصولات را حفظ کن و فقط orders را به‌روزرسانی کن
+            const products = currentData.record?.products || [];
+            
+            const response = await fetch(JSONBIN_URL, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': JSONBIN_API_KEY
+                },
+                body: JSON.stringify({ 
+                    products: products,
+                    orders: orders 
+                })
+            });
+
+            if (response.ok) {
+                // همگام‌سازی با localStorage
+                localStorage.setItem('combo_shop_orders', JSON.stringify(orders));
+                return true;
+            } else {
+                throw new Error('خطا در ذخیره در JSONBin');
+            }
+        } catch (error) {
+            console.error('خطا در ذخیره سفارش‌ها در JSONBin:', error);
+            // Fallback به localStorage
+            localStorage.setItem('combo_shop_orders', JSON.stringify(orders));
+            return false;
+        }
+    }
+
+    /**
+     * بارگذاری سفارش‌ها از localStorage
+     */
+    loadOrdersFromLocalStorage() {
+        const saved = localStorage.getItem('combo_shop_orders');
+        if (saved) {
+            return JSON.parse(saved);
+        }
+        return [];
+    }
+
+    /**
      * بررسی اینکه آیا سرویس فعال است یا نه
      */
     isActive() {

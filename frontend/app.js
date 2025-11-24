@@ -442,11 +442,6 @@ async function confirmPayment() {
 
     const orderData = window.pendingOrder;
 
-    // ذخیره در Firebase (اگر فعال باشد)
-    if (typeof firebaseService !== 'undefined') {
-        await firebaseService.saveOrder(orderData);
-    }
-    
     // همیشه در localStorage هم ذخیره کن (برای backup)
     const orders = JSON.parse(localStorage.getItem(ORDERS_STORAGE_KEY) || '[]');
     
@@ -459,7 +454,27 @@ async function confirmPayment() {
     }
     
     localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
-    console.log('Order saved, total orders:', orders.length); // Debug
+    console.log('Order saved to localStorage, total orders:', orders.length); // Debug
+
+    // ذخیره در JSONBin (اگر فعال باشد) - اولویت اول
+    if (typeof jsonbinService !== 'undefined' && jsonbinService.isActive()) {
+        try {
+            await jsonbinService.saveOrders(orders);
+            console.log('Order saved to JSONBin'); // Debug
+        } catch (error) {
+            console.error('خطا در ذخیره در JSONBin:', error);
+        }
+    }
+    
+    // ذخیره در Firebase (اگر فعال باشد) - اولویت دوم
+    if (typeof firebaseService !== 'undefined') {
+        try {
+            await firebaseService.saveOrder(orderData);
+            console.log('Order saved to Firebase'); // Debug
+        } catch (error) {
+            console.error('خطا در ذخیره در Firebase:', error);
+        }
+    }
 
     // ساخت متن سفارش برای ارسال به Formspree
     const orderText = createOrderText(orderData);

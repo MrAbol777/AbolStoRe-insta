@@ -100,24 +100,44 @@ async function loadProducts() {
 async function loadOrders() {
     console.log('Loading orders...'); // Debug
     
-    // اول از Firebase بخوان (اگر فعال باشد)
-    if (typeof firebaseService !== 'undefined') {
-        orders = await firebaseService.loadOrders();
-        console.log('Orders loaded from Firebase:', orders.length); // Debug
+    try {
+        // اول از JSONBin بخوان (اگر فعال باشد) - ساده‌تر از Firebase
+        if (typeof jsonbinService !== 'undefined' && jsonbinService.isActive()) {
+            orders = await jsonbinService.loadOrders();
+            console.log('Orders loaded from JSONBin:', orders.length, orders); // Debug
+            renderOrders();
+            return;
+        }
+
+        // دوم از Firebase بخوان (اگر فعال باشد)
+        if (typeof firebaseService !== 'undefined') {
+            orders = await firebaseService.loadOrders();
+            console.log('Orders loaded from Firebase:', orders.length); // Debug
+            renderOrders();
+            return;
+        }
+        
+        // Fallback: از localStorage بخوان
+        const savedOrders = localStorage.getItem(ORDERS_STORAGE_KEY);
+        if (savedOrders) {
+            orders = JSON.parse(savedOrders);
+            console.log('Orders loaded from localStorage:', orders.length, orders); // Debug
+        } else {
+            orders = [];
+            console.log('No orders found in localStorage'); // Debug
+        }
         renderOrders();
-        return;
+    } catch (error) {
+        console.error('خطا در بارگذاری سفارش‌ها:', error);
+        // Fallback: از localStorage بخوان
+        const savedOrders = localStorage.getItem(ORDERS_STORAGE_KEY);
+        if (savedOrders) {
+            orders = JSON.parse(savedOrders);
+        } else {
+            orders = [];
+        }
+        renderOrders();
     }
-    
-    // Fallback: از localStorage بخوان
-    const savedOrders = localStorage.getItem(ORDERS_STORAGE_KEY);
-    if (savedOrders) {
-        orders = JSON.parse(savedOrders);
-        console.log('Orders loaded from localStorage:', orders.length, orders); // Debug
-    } else {
-        orders = [];
-        console.log('No orders found in localStorage'); // Debug
-    }
-    renderOrders();
 }
 
 async function saveProducts() {
@@ -136,8 +156,26 @@ async function saveProducts() {
     }
 }
 
-function saveOrders() {
-    localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
+async function saveOrders() {
+    try {
+        // اول JSONBin را امتحان کن (ساده‌تر)
+        if (typeof jsonbinService !== 'undefined' && jsonbinService.isActive()) {
+            await jsonbinService.saveOrders(orders);
+            return;
+        }
+        
+        // دوم Firebase را امتحان کن
+        if (typeof firebaseService !== 'undefined') {
+            await firebaseService.saveOrders(orders);
+        }
+        
+        // همیشه در localStorage هم ذخیره کن (برای backup)
+        localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
+    } catch (error) {
+        console.error('خطا در ذخیره سفارش‌ها:', error);
+        // Fallback: فقط localStorage
+        localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
+    }
 }
 
 // ============================================
@@ -407,15 +445,11 @@ function deleteOrder(id) {
 
 async function updateOrderStatus(id, status) {
     try {
-        // به‌روزرسانی در Firebase (اگر فعال باشد)
-        if (typeof firebaseService !== 'undefined') {
-            await firebaseService.updateOrderStatus(id, status);
-        }
-        
         const order = orders.find(o => o.id === id);
         if (order) {
             order.status = status;
-            saveOrders();
+            // ذخیره در JSONBin یا Firebase
+            await saveOrders();
             renderOrders();
         }
     } catch (error) {
@@ -424,7 +458,7 @@ async function updateOrderStatus(id, status) {
         const order = orders.find(o => o.id === id);
         if (order) {
             order.status = status;
-            saveOrders();
+            localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
             renderOrders();
         }
     }
