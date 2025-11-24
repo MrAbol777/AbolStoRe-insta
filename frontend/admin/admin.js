@@ -98,19 +98,34 @@ async function loadProducts() {
 }
 
 async function loadOrders() {
-    console.log('Loading orders...'); // Debug
+    console.log('=== Loading orders ==='); // Debug
     
     try {
         // اول از JSONBin بخوان (اگر فعال باشد) - ساده‌تر از Firebase
         if (typeof jsonbinService !== 'undefined' && jsonbinService.isActive()) {
+            console.log('Trying to load from JSONBin...'); // Debug
             orders = await jsonbinService.loadOrders();
-            console.log('Orders loaded from JSONBin:', orders.length, orders); // Debug
+            console.log('Orders loaded from JSONBin:', orders.length); // Debug
+            console.log('Orders data:', orders); // Debug
+            
+            // اگر خالی بود، localStorage را هم چک کن
+            if (orders.length === 0) {
+                console.log('JSONBin is empty, checking localStorage...'); // Debug
+                const savedOrders = localStorage.getItem(ORDERS_STORAGE_KEY);
+                if (savedOrders) {
+                    const localOrders = JSON.parse(savedOrders);
+                    console.log('Found orders in localStorage:', localOrders.length); // Debug
+                    orders = localOrders;
+                }
+            }
+            
             renderOrders();
             return;
         }
 
         // دوم از Firebase بخوان (اگر فعال باشد)
         if (typeof firebaseService !== 'undefined') {
+            console.log('Trying to load from Firebase...'); // Debug
             orders = await firebaseService.loadOrders();
             console.log('Orders loaded from Firebase:', orders.length); // Debug
             renderOrders();
@@ -118,10 +133,17 @@ async function loadOrders() {
         }
         
         // Fallback: از localStorage بخوان
+        console.log('Loading from localStorage (fallback)...'); // Debug
         const savedOrders = localStorage.getItem(ORDERS_STORAGE_KEY);
         if (savedOrders) {
-            orders = JSON.parse(savedOrders);
-            console.log('Orders loaded from localStorage:', orders.length, orders); // Debug
+            try {
+                orders = JSON.parse(savedOrders);
+                console.log('Orders loaded from localStorage:', orders.length); // Debug
+                console.log('Orders data:', orders); // Debug
+            } catch (parseError) {
+                console.error('Error parsing orders from localStorage:', parseError);
+                orders = [];
+            }
         } else {
             orders = [];
             console.log('No orders found in localStorage'); // Debug
@@ -132,12 +154,20 @@ async function loadOrders() {
         // Fallback: از localStorage بخوان
         const savedOrders = localStorage.getItem(ORDERS_STORAGE_KEY);
         if (savedOrders) {
-            orders = JSON.parse(savedOrders);
+            try {
+                orders = JSON.parse(savedOrders);
+                console.log('Fallback: Orders loaded from localStorage:', orders.length); // Debug
+            } catch (parseError) {
+                console.error('Error parsing orders:', parseError);
+                orders = [];
+            }
         } else {
             orders = [];
         }
         renderOrders();
     }
+    
+    console.log('=== Finished loading orders ==='); // Debug
 }
 
 async function saveProducts() {

@@ -114,19 +114,46 @@ class JSONBinService {
             });
 
             if (!response.ok) {
-                throw new Error('خطا در بارگذاری از JSONBin');
+                console.warn('خطا در بارگذاری از JSONBin، از localStorage استفاده می‌شود');
+                return this.loadOrdersFromLocalStorage();
             }
 
             const data = await response.json();
-            const orders = data.record?.orders || [];
-
-            if (orders.length > 0) {
-                // همگام‌سازی با localStorage
-                localStorage.setItem('combo_shop_orders', JSON.stringify(orders));
-                return orders;
-            } else {
-                return this.loadOrdersFromLocalStorage();
+            console.log('JSONBin data received:', data); // Debug
+            
+            // بررسی ساختار داده
+            let orders = [];
+            if (data.record) {
+                if (Array.isArray(data.record.orders)) {
+                    orders = data.record.orders;
+                } else if (Array.isArray(data.record)) {
+                    // اگر record خودش یک array است
+                    orders = data.record;
+                }
             }
+            
+            console.log('Orders from JSONBin:', orders.length); // Debug
+
+            // همیشه localStorage را هم چک کن و merge کن
+            const localOrders = this.loadOrdersFromLocalStorage();
+            console.log('Orders from localStorage:', localOrders.length); // Debug
+            
+            // ترکیب سفارش‌ها (حذف duplicate بر اساس id)
+            const allOrders = [...orders];
+            localOrders.forEach(localOrder => {
+                if (!allOrders.find(o => o.id === localOrder.id)) {
+                    allOrders.push(localOrder);
+                }
+            });
+            
+            console.log('Total orders after merge:', allOrders.length); // Debug
+
+            // ذخیره در localStorage برای sync
+            if (allOrders.length > 0) {
+                localStorage.setItem('combo_shop_orders', JSON.stringify(allOrders));
+            }
+            
+            return allOrders;
         } catch (error) {
             console.error('خطا در بارگذاری سفارش‌ها از JSONBin:', error);
             return this.loadOrdersFromLocalStorage();
