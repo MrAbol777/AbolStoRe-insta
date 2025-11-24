@@ -28,12 +28,41 @@ function checkAuth() {
 // ============================================
 
 async function loadProducts() {
-    // اول از localStorage می‌خوانیم
+    // اول از Firebase بخوان (اگر فعال باشد)
+    if (typeof firebaseService !== 'undefined') {
+        products = await firebaseService.loadProducts();
+        
+        // اگر خالی بود، از products.json بخوان
+        if (products.length === 0) {
+            try {
+                const response = await fetch('../products.json');
+                if (response.ok) {
+                    products = await response.json();
+                    // ذخیره در Firebase
+                    await firebaseService.saveProducts(products);
+                }
+            } catch (error) {
+                console.error('خطا در بارگذاری محصولات:', error);
+            }
+        }
+        
+        renderProducts();
+        
+        // گوش دادن به تغییرات Real-time
+        firebaseService.onProductsChange((updatedProducts) => {
+            products = updatedProducts;
+            renderProducts();
+        });
+        
+        return;
+    }
+    
+    // Fallback: از localStorage بخوان
     const savedProducts = localStorage.getItem(PRODUCTS_STORAGE_KEY);
     if (savedProducts) {
         products = JSON.parse(savedProducts);
     } else {
-        // اگر نبود، از فایل JSON می‌خوانیم
+        // اگر نبود، از فایل JSON بخوان
         try {
             const response = await fetch('../products.json');
             if (response.ok) {
@@ -47,7 +76,15 @@ async function loadProducts() {
     renderProducts();
 }
 
-function loadOrders() {
+async function loadOrders() {
+    // اول از Firebase بخوان (اگر فعال باشد)
+    if (typeof firebaseService !== 'undefined') {
+        orders = await firebaseService.loadOrders();
+        renderOrders();
+        return;
+    }
+    
+    // Fallback: از localStorage بخوان
     const savedOrders = localStorage.getItem(ORDERS_STORAGE_KEY);
     if (savedOrders) {
         orders = JSON.parse(savedOrders);
@@ -57,8 +94,14 @@ function loadOrders() {
     renderOrders();
 }
 
-function saveProducts() {
-    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+async function saveProducts() {
+    // ذخیره در Firebase (اگر فعال باشد)
+    if (typeof firebaseService !== 'undefined') {
+        await firebaseService.saveProducts(products);
+    } else {
+        // Fallback: localStorage
+        localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+    }
 }
 
 function saveOrders() {
@@ -260,7 +303,8 @@ function saveProduct(event) {
         products.push(product);
     }
 
-    saveProducts();
+    // ذخیره در Firebase
+    await saveProducts();
     renderProducts();
     closeModal('productModal');
     event.target.reset();
