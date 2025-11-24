@@ -98,9 +98,12 @@ async function loadProducts() {
 }
 
 async function loadOrders() {
+    console.log('Loading orders...'); // Debug
+    
     // اول از Firebase بخوان (اگر فعال باشد)
     if (typeof firebaseService !== 'undefined') {
         orders = await firebaseService.loadOrders();
+        console.log('Orders loaded from Firebase:', orders.length); // Debug
         renderOrders();
         return;
     }
@@ -109,8 +112,10 @@ async function loadOrders() {
     const savedOrders = localStorage.getItem(ORDERS_STORAGE_KEY);
     if (savedOrders) {
         orders = JSON.parse(savedOrders);
+        console.log('Orders loaded from localStorage:', orders.length, orders); // Debug
     } else {
         orders = [];
+        console.log('No orders found in localStorage'); // Debug
     }
     renderOrders();
 }
@@ -180,6 +185,9 @@ function renderProducts() {
 function renderOrders() {
     const ordersList = document.getElementById('ordersList');
     
+    console.log('Rendering orders, count:', orders.length); // Debug
+    console.log('Orders data:', orders); // Debug
+    
     if (orders.length === 0) {
         ordersList.innerHTML = `
             <div class="empty-state">
@@ -190,8 +198,30 @@ function renderOrders() {
         return;
     }
 
+    // اطمینان از اینکه orders یک array است
+    if (!Array.isArray(orders)) {
+        console.error('Orders is not an array!', orders);
+        orders = [];
+        ordersList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">⚠️</div>
+                <p>خطا در بارگذاری سفارش‌ها</p>
+            </div>
+        `;
+        return;
+    }
+
     // مرتب‌سازی بر اساس تاریخ (جدیدترین اول)
-    const sortedOrders = [...orders].sort((a, b) => b.id - a.id);
+    const sortedOrders = [...orders].sort((a, b) => {
+        // اگر id عددی است
+        if (typeof a.id === 'number' && typeof b.id === 'number') {
+            return b.id - a.id;
+        }
+        // اگر id رشته است یا timestamp
+        return (b.id || 0) - (a.id || 0);
+    });
+
+    console.log('Sorted orders:', sortedOrders.length); // Debug
 
     ordersList.innerHTML = sortedOrders.map(order => `
         <div class="order-card">

@@ -445,12 +445,21 @@ async function confirmPayment() {
     // ذخیره در Firebase (اگر فعال باشد)
     if (typeof firebaseService !== 'undefined') {
         await firebaseService.saveOrder(orderData);
-    } else {
-        // Fallback: localStorage
-        const orders = JSON.parse(localStorage.getItem(ORDERS_STORAGE_KEY) || '[]');
-        orders.push(orderData);
-        localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
     }
+    
+    // همیشه در localStorage هم ذخیره کن (برای backup)
+    const orders = JSON.parse(localStorage.getItem(ORDERS_STORAGE_KEY) || '[]');
+    
+    // بررسی اینکه آیا این سفارش قبلاً وجود دارد یا نه
+    const existingIndex = orders.findIndex(o => o.id === orderData.id);
+    if (existingIndex >= 0) {
+        orders[existingIndex] = orderData; // به‌روزرسانی
+    } else {
+        orders.push(orderData); // اضافه کردن جدید
+    }
+    
+    localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
+    console.log('Order saved, total orders:', orders.length); // Debug
 
     // ساخت متن سفارش برای ارسال به Formspree
     const orderText = createOrderText(orderData);
